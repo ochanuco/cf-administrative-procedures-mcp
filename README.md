@@ -49,18 +49,29 @@ XLSX のヘッダ2行処理や表記ゆれ吸収という一番泥臭い部分�
 
 ## 使う
 
-```
-https://cf-administrative-procedures-mcp.teacatus.workers.dev/mcp
-```
+トランスポートは Streamable HTTP、エンドポイントは `/mcp`。提供ツールは上流と同じ4つ（`list_datasets` / `inspect_dataset` / `query_records` / `summarize_records`）。
 
-Streamable HTTP。認証なし。Claude Code なら:
+自分でデプロイした Worker の URL を `<your-worker-url>` に読み替えて登録する。
 
 ```bash
-claude mcp add -s user admin-procedures -t http \
-  https://cf-administrative-procedures-mcp.teacatus.workers.dev/mcp
+# Claude Code
+claude mcp add -s user admin-procedures -t http <your-worker-url>/mcp
+
+# Codex CLI
+codex mcp add admin-procedures --url <your-worker-url>/mcp
 ```
 
-提供ツールは上流と同じ4つ（`list_datasets` / `inspect_dataset` / `query_records` / `summarize_records`）。
+Gemini CLI は `~/.gemini/settings.json` に書く。Streamable HTTP のキーは `url` ではなく `httpUrl`（`url` は SSE 扱いになる）。
+
+```json
+{
+  "mcpServers": {
+    "admin-procedures": { "httpUrl": "<your-worker-url>/mcp" }
+  }
+}
+```
+
+このリポジトリは稼働中のインスタンスを公開していない。使うには自分の Cloudflare アカウントへデプロイすること。
 
 ## 開発
 
