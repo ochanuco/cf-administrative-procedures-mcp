@@ -194,8 +194,13 @@ def sql_literal(v: object) -> str:
     return "'" + str(v).replace("'", "''") + "'"
 
 
-def write_dump(con: sqlite3.Connection, path: Path, batch: int = 500) -> None:
-    """D1 の `wrangler d1 execute --file` に渡す SQL を生成する。"""
+def write_dump(con: sqlite3.Connection, path: Path, max_stmt_bytes: int = 50_000) -> None:
+    """D1 の `wrangler d1 execute --file` に渡す SQL を生成する。
+
+    INSERT は複数行をまとめるが、行数ではなくバイト数で区切る。1 行あたりの
+    長さが列の内容次第で大きく振れるため、行数固定だと文が肥大して D1 が
+    SQLITE_TOOBIG を返す (500 行固定では最大 573KB に達した)。
+    """
     schema = [
         r[0]
         for r in con.execute(
@@ -217,22 +222,25 @@ def write_dump(con: sqlite3.Connection, path: Path, batch: int = 500) -> None:
         for table in tables:
             cols = [r[1] for r in con.execute(f"PRAGMA table_info({table})")]
             quoted = ", ".join(f'"{c}"' for c in cols)
+            header = f"INSERT INTO {table} ({quoted}) VALUES\n"
             pending: list[str] = []
+            pending_bytes = 0
 
             def flush() -> None:
+                nonlocal pending_bytes
                 if pending:
-                    out.write(
-                        f"INSERT INTO {table} ({quoted}) VALUES\n"
-                        + ",\n".join(pending)
-                        + ";\n"
-                    )
+                    out.write(header + ",\n".join(pending) + ";\n")
                     pending.clear()
+                    pending_bytes = 0
 
             for row in con.execute(f"SELECT {quoted} FROM {table}"):
-                pending.append("(" + ", ".join(sql_literal(v) for v in row) + ")")
-                rows_total += 1
-                if len(pending) >= batch:
+                tup = "(" + ", ".join(sql_literal(v) for v in row) + ")"
+                size = len(tup.encode()) + 2
+                if pending and pending_bytes + size > max_stmt_bytes:
                     flush()
+                pending.append(tup)
+                pending_bytes += size
+                rows_total += 1
             flush()
     size = path.stat().st_size / 1024 / 1024
     print(f"  → {path} ({size:.1f} MB, {rows_total:,} 行)")

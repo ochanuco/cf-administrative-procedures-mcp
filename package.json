@@ -1,0 +1,24 @@
+{
+  "name": "cf-administrative-procedures-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "cf-typegen": "wrangler types",
+    "build:data": "uv run --script tools/build_sqlite.py --dataset build/upstream/datasets/procedures-survey-r6",
+    "import:d1": "wrangler d1 execute admin-procedures --remote --yes --file=build/dump.sql"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "^2.0.0",
+    "agents": "^0.20.1",
+    "hono": "^4.13.2",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "wrangler": "^4.123.0"
+  }
+}

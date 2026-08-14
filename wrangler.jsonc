@@ -1,0 +1,19 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "cf-administrative-procedures-mcp",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-14",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true
+  },
+  // Durable Objects は使わない。createMcpHandler のステートレス Streamable HTTP
+  // で足りるため、バインディングは D1 だけ。
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "admin-procedures",
+      "database_id": "eab7c494-054c-4b68-9bc9-5afb37da7f15"
+    }
+  ]
+}
