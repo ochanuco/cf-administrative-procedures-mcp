@@ -47,9 +47,51 @@ XLSX のヘッダ2行処理や表記ゆれ吸収という一番泥臭い部分�
 
 **Durable Objects を使わない。** Agents SDK の `createMcpHandler` がステートレスな Streamable HTTP に対応したため、読み取り専用のこのサーバーには DO が要らない。バインディングは D1 ひとつ。
 
+## 使う
+
+```
+https://cf-administrative-procedures-mcp.teacatus.workers.dev/mcp
+```
+
+Streamable HTTP。認証なし。Claude Code なら:
+
+```bash
+claude mcp add -s user admin-procedures -t http \
+  https://cf-administrative-procedures-mcp.teacatus.workers.dev/mcp
+```
+
+提供ツールは上流と同じ4つ（`list_datasets` / `inspect_dataset` / `query_records` / `summarize_records`）。
+
+## 開発
+
+```bash
+npm install
+npm run build:data     # Parquet → SQLite + dataset.json
+npm run import:d1      # D1 へ投入
+npm run typecheck
+npm run dev            # wrangler dev（--remote で実 D1）
+npm run smoke          # MCP エンドポイントの疎通確認
+```
+
+データの取得は上流の CLI に任せる:
+
+```bash
+git clone https://github.com/digital-go-jp/administrative-procedures-mcp.git build/upstream
+cd build/upstream && uv sync --extra excel && uv run apcli fetch procedures-survey-r6
+```
+
+## 踏んだ罠
+
+**`.dump` は使えない。** `sqlite3` 3.51 は改行を含む値を `unistr('...
+...')` で出力するが、D1 の SQLite に `unistr()` が無い（535箇所該当）。しかも `wrangler` の終了コードは 0 で返るため、ログを見ないと失敗に気づけない。SQL は Python から直接生成している。
+
+**バッチ INSERT は行数で区切らない。** 列の内容次第で1行の長さが振れ、500行固定では最大 573KB の文ができて `SQLITE_TOOBIG` になる。バイト数（50KB）で区切る。
+
+**`createMcpHandler` は自身でもパスを検証する。** Hono 側でルーティングしただけでは `/mcp/` が 404 になるため、`route` オプションを明示する。
+
 ## ステータス
 
-設計フェーズ。実装はこれから。
+D1 投入・デプロイ済み。4ツールが本番で動作。
 
 ## ライセンス
 
