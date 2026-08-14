@@ -1,6 +1,14 @@
+administrative-procedures-mcp
+https://github.com/digital-go-jp/administrative-procedures-mcp
+
+The following MIT license and copyright notice are retained as required by the
+license of the upstream project from which this repository is derived.
+
+---
+
 MIT License
 
-Copyright (c) 2026 ochanuco
+Copyright (c) 2026 Digital Agency, Government of Japan
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

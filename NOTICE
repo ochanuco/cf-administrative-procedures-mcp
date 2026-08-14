@@ -22,7 +22,8 @@ Material derived from the upstream project includes:
     query_records, summarize_records — including parameter names, the `where`
     operator DSL, and response semantics.
 
-The upstream MIT license text is retained in LICENSE.
+The upstream MIT license text and copyright notice are retained in
+THIRD-PARTY-LICENSES/digital-go-jp-administrative-procedures-mcp.txt.
 
 ---
 
