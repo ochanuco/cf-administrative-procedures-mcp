@@ -177,10 +177,72 @@ def build_definition(ds: dict, df: pl.DataFrame) -> dict:
     }
 
 
+def sql_literal(v: object) -> str:
+    """SQLite の文字列リテラルに変換する。
+
+    改行は生のまま埋め込む。SQLite の文字列リテラルは改行をそのまま含められ、
+    wrangler の文分割もクォートを認識するため問題ない。sqlite3 の .dump は
+    改行を含む値を unistr('...\\u000a...') で出力するが、D1 の SQLite には
+    unistr() が無く投入時に落ちるので、.dump は使わずここで生成する。
+    """
+    if v is None:
+        return "NULL"
+    if isinstance(v, bool):
+        return "1" if v else "0"
+    if isinstance(v, (int, float)):
+        return repr(v)
+    return "'" + str(v).replace("'", "''") + "'"
+
+
+def write_dump(con: sqlite3.Connection, path: Path, batch: int = 500) -> None:
+    """D1 の `wrangler d1 execute --file` に渡す SQL を生成する。"""
+    schema = [
+        r[0]
+        for r in con.execute(
+            "SELECT sql FROM sqlite_master WHERE sql IS NOT NULL "
+            "ORDER BY CASE type WHEN 'table' THEN 0 ELSE 1 END"
+        )
+    ]
+    tables = [
+        r[0]
+        for r in con.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+        )
+    ]
+
+    rows_total = 0
+    with path.open("w", encoding="utf-8") as out:
+        for stmt in schema:
+            out.write(stmt.rstrip().rstrip(";") + ";\n")
+        for table in tables:
+            cols = [r[1] for r in con.execute(f"PRAGMA table_info({table})")]
+            quoted = ", ".join(f'"{c}"' for c in cols)
+            pending: list[str] = []
+
+            def flush() -> None:
+                if pending:
+                    out.write(
+                        f"INSERT INTO {table} ({quoted}) VALUES\n"
+                        + ",\n".join(pending)
+                        + ";\n"
+                    )
+                    pending.clear()
+
+            for row in con.execute(f"SELECT {quoted} FROM {table}"):
+                pending.append("(" + ", ".join(sql_literal(v) for v in row) + ")")
+                rows_total += 1
+                if len(pending) >= batch:
+                    flush()
+            flush()
+    size = path.stat().st_size / 1024 / 1024
+    print(f"  → {path} ({size:.1f} MB, {rows_total:,} 行)")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dataset", type=Path, required=True, help="dataset.yaml のあるディレクトリ")
     ap.add_argument("--db", type=Path, default=Path("build/apm.db"))
+    ap.add_argument("--dump", type=Path, default=Path("build/dump.sql"))
     ap.add_argument("--definition", type=Path, default=Path("src/generated/dataset.json"))
     args = ap.parse_args()
 
@@ -196,8 +258,11 @@ def main() -> None:
     create_indexes(con, ds)
     con.commit()
     con.execute("VACUUM")
-    con.close()
     print(f"  → {args.db} ({args.db.stat().st_size / 1024 / 1024:.1f} MB)")
+
+    print("[dump]")
+    write_dump(con, args.dump)
+    con.close()
 
     args.definition.parent.mkdir(parents=True, exist_ok=True)
     definition = build_definition(ds, df)
