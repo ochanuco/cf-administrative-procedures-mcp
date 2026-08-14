@@ -12,15 +12,22 @@ import { createServer } from "./mcp.js";
 
 const app = new Hono<{ Bindings: Env }>();
 
-app.all("/mcp", (c) =>
-  createMcpHandler(() => createServer(c.env))(
+/**
+ * createMcpHandler は自身でもリクエストパスを検証するため、Hono 側で
+ * ルーティングしただけでは末尾スラッシュ付きが 404 になる。route を
+ * 明示して両方受けられるようにする。
+ */
+const mcp = (route: string) => (c: { req: { raw: Request }; env: Env; executionCtx: unknown }) =>
+  createMcpHandler(() => createServer(c.env), { route })(
     c.req.raw,
     c.env,
     // Hono が公開する ExecutionContext 型は Workers ランタイムの型と定義が
     // 揃っていないため、実体は同一だが明示的に合わせる。
-    c.executionCtx as unknown as ExecutionContext,
-  ),
-);
+    c.executionCtx as ExecutionContext,
+  );
+
+app.all("/mcp", mcp("/mcp"));
+app.all("/mcp/", mcp("/mcp/"));
 
 app.get("/health", (c) => c.json({ ok: true }));
 
