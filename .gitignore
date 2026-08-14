@@ -1,0 +1,43 @@
+# Node
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Wrangler
+.wrangler/
+.dev.vars
+.dev.vars.*
+
+# Python (ビルドパイプライン用)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# ビルド成果物・中間データ
+build/
+source-data/
+*.parquet
+*.xlsx
+*.db
+*.sqlite
+*.sqlite3
+dump.sql
+
+# 調査結果データは配布元で改訂されるため同梱しない
+datasets/*/data.parquet
+datasets/*/.fetch.json
+
+# ローカル調査用ワークスペース (workbench への symlink)
+.local/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# AI tools
+.claude/
+CLAUDE.md
+.codex/

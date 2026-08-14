@@ -1,0 +1,37 @@
+cf-administrative-procedures-mcp
+Copyright (c) 2026 ochanuco
+
+This project is an unofficial derivative work. It is not affiliated with,
+endorsed by, or maintained by the Digital Agency, Government of Japan.
+
+---
+
+Upstream software
+
+  administrative-procedures-mcp
+  Copyright (c) 2026 Digital Agency, Government of Japan
+  Licensed under the MIT License
+  https://github.com/digital-go-jp/administrative-procedures-mcp
+
+Material derived from the upstream project includes:
+
+  - The dataset definition (datasets/*/dataset.yaml), covering the 38-column
+    structure, codelists, and field descriptions.
+  - The dataset preparation pipeline (XLSX -> Parquet).
+  - The MCP tool interface contract: list_datasets, inspect_dataset,
+    query_records, summarize_records — including parameter names, the `where`
+    operator DSL, and response semantics.
+
+The upstream MIT license text is retained in LICENSE.
+
+---
+
+Data
+
+  行政手続等の棚卸調査結果 (Administrative Procedures Survey Results)
+  Published by デジタル庁 (Digital Agency, Government of Japan)
+  https://www.digital.go.jp/resources/procedures-survey-results
+
+The survey data itself is NOT redistributed in this repository. It is fetched
+from the publisher's distribution page at build time. Use of the data is
+subject to the terms of use published on digital.go.jp.
