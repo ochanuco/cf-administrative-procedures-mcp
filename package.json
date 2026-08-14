@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "wrangler types && tsc --noEmit",
     "cf-typegen": "wrangler types",
+    "smoke": "uv run --script tools/smoke.py",
     "build:data": "uv run --script tools/build_sqlite.py --dataset build/upstream/datasets/procedures-survey-r6",
     "import:d1": "wrangler d1 execute admin-procedures --remote --yes --file=build/dump.sql"
   },
