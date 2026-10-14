@@ -42,5 +42,5 @@ datasets/*/.fetch.json
 CLAUDE.md
 .codex/
 
-# wrangler types が生成する (573KB)。npm run cf-typegen で再生成できる
+# wrangler types が生成する (573KB)。pnpm run cf-typegen で再生成できる
 worker-configuration.d.ts

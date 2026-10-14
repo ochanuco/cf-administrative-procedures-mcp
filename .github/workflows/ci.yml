@@ -1,0 +1,20 @@
+name: ci
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  ci:
+    uses: ochanuco/.github/.github/workflows/pnpm.yml@e5102a8ff65b3c15a2afa263d4970dbbe6538862 # v1.1.0
+    with:
+      run: pnpm run typecheck
