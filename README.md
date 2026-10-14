@@ -76,12 +76,12 @@ Gemini CLI は `~/.gemini/settings.json` に書く。Streamable HTTP のキー�
 ## 開発
 
 ```bash
-npm install
-npm run build:data     # Parquet → SQLite + dataset.json
-npm run import:d1      # D1 へ投入
-npm run typecheck
-npm run dev            # wrangler dev（--remote で実 D1）
-npm run smoke          # MCP エンドポイントの疎通確認
+pnpm install
+pnpm run build:data     # Parquet → SQLite + dataset.json
+pnpm run import:d1      # D1 へ投入
+pnpm run typecheck
+pnpm run dev            # wrangler dev（--remote で実 D1）
+pnpm run smoke          # MCP エンドポイントの疎通確認
 ```
 
 データの取得は上流の CLI に任せる:
