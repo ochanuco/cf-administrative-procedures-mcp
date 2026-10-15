@@ -1,4 +1,5 @@
 name: deploy
+run-name: deploy cf-administrative-procedures-mcp @ ${{ inputs.ref }}
 
 on:
   workflow_dispatch:
