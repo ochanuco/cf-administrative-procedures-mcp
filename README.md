@@ -84,7 +84,7 @@ pnpm run dev            # wrangler dev（--remote で実 D1）
 pnpm run smoke          # MCP エンドポイントの疎通確認
 ```
 
-Worker のデプロイは GitHub Actions の `deploy` workflow を手動で実行する。入力 `ref` は main か main 上のコミット SHA で、Environment `production` の承認後に `scripts/deploy.sh production`（`wrangler deploy`）が走る。D1 のデータ（`build:data` / `import:d1`）はデプロイに含まれず、更新するときに手で実行する。
+Worker のデプロイは、main へのマージで、GitHub Actions の `deploy` workflow が本番に出す。承認が要るのは、前回の記録がない・ロールバック・手作業の要る変更（`tools/` の変更など）を含むときだけで、Environment `production-approval` で止まる。何が出るかと承認の要否は、run の `plan` ジョブの Job Summary に出る。手動実行（入力 `ref` は main か main 上のコミット SHA）はロールバック用。`scripts/deploy.sh production`（`wrangler deploy`）が走る。D1 のデータ（`build:data` / `import:d1`）はデプロイに含まれず、更新するときに手で実行する。
 
 データの取得は上流の CLI に任せる:
 
