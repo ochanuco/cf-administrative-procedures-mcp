@@ -1,22 +1,43 @@
 name: deploy
-run-name: deploy cf-administrative-procedures-mcp @ ${{ inputs.ref }}
+run-name: deploy cf-administrative-procedures-mcp @ ${{ inputs.ref || github.sha }}
 
+# main への push で本番に出す。承認は deploy-plan が危ないと判定したとき（前回の記録なし・ロールバック・notices のパスの変更）だけ、
+# Environment production-approval で止まる。手動実行はロールバック用
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       ref:
-        description: デプロイする ref（main、または main 上のコミット SHA）
+        description: デプロイする ref（main、または main 上のコミット SHA。古い SHA はロールバック）
         required: true
         default: main
 
 permissions:
   contents: read
 
+# run 全体を直列にする。名前は deploy.yml のジョブの concurrency（deploy-production）と変える
+concurrency:
+  group: deploy-run-production
+  cancel-in-progress: false
+
 jobs:
-  deploy:
-    uses: ochanuco/.github/.github/workflows/deploy.yml@71e324e93ea560488bcc309e52c5ce48ef8a282c # v1.3.0
+  plan:
+    uses: ochanuco/.github/.github/workflows/deploy-plan.yml@737e6affb5e43803670afb13376dded4731e3388 # v1.5.0
+    permissions:
+      contents: read
+      actions: read
     with:
-      ref: ${{ inputs.ref }}
+      ref: ${{ inputs.ref || 'main' }}
+      approval-environment: production-approval
+      notices: |
+        tools/=D1 のデータの作り方の変更を含む。`build:data` と `import:d1` を手で実行する
+  deploy:
+    needs: plan
+    uses: ochanuco/.github/.github/workflows/deploy.yml@737e6affb5e43803670afb13376dded4731e3388 # v1.5.0
+    with:
+      ref: ${{ needs.plan.outputs.sha }}
+      approval-environment: ${{ needs.plan.outputs.approval-environment }}
       op-env-file: .github/deploy/production.env.op
       run: scripts/deploy.sh production
     secrets: inherit
