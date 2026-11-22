@@ -174,7 +174,7 @@ importers:
         version: 0.33.0(@babel/core@8.0.1)(@babel/runtime@7.29.7)(@modelcontextprotocol/client@2.4.0)(@modelcontextprotocol/server@2.4.0)(react@19.2.8)(rolldown@1.2.4)(zod@4.6.7)
       hono:
         specifier: ^4.13.2
-        version: 4.13.17
+        version: 4.13.18
       zod:
         specifier: ^4.4.3
         version: 4.6.7
@@ -1106,8 +1106,8 @@ packages:
     resolution: {integrity: sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==}
     engines: {node: '>=6.9.0'}
 
-  hono@4.13.17:
-    resolution: {integrity: sha512-vZIcbkvjOR5hHRWERbGkr8fGfF0GGM1ooYkuH448iO3b2AdVEr3AXZSw4Z3Kn+1L5z0CVoVeyV29VGYmFh05kQ==}
+  hono@4.13.18:
+    resolution: {integrity: sha512-H9q/E1XizaWstJxUW881dmLxEj+t/TrGGnyxINkm4+sK0qUwsMtFdo2BWI9Vs3cIS19MU6b6iCijoUoEf4f3DA==}
     engines: {node: '>=16.9.0'}
 
   import-meta-resolve@4.2.0:
@@ -1950,7 +1950,7 @@ snapshots:
 
   gensync@1.0.0-beta.2: {}
 
-  hono@4.13.17: {}
+  hono@4.13.18: {}
 
   import-meta-resolve@4.2.0: {}
 
